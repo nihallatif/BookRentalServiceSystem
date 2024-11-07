@@ -11,7 +11,7 @@ namespace BookRental.Application.Interfaces
     {
         Task<User> GetUserByIdAsync(int id);
         Task<User> GetUserByUsernameAsync(string username);
-        Task RegisterUserAsync(User user);
+        Task RegisterUserAsync(User user, string password);
         Task UpdateUserAsync(User user);
     }
 }

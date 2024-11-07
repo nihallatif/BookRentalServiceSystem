@@ -1,6 +1,9 @@
 ﻿using BookRental.Application.Interfaces;
 using BookRental.Application.Models;
+using BookRental.Application.Services;
+using BookRental.Domain.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookRental.Api.Controllers
@@ -9,13 +12,29 @@ namespace BookRental.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthenticationService authenticationService, ILogger<AuthController> logger)
+        public AuthController(IAuthenticationService authenticationService, IUserService userService, ILogger<AuthController> logger)
         {
             _authenticationService = authenticationService;
+            _userService = userService;
             _logger = logger;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterUserRequest request)
+        {
+            var user = new User
+            {
+                Username = request.Username,
+                Role = request.Role // You might want to assign default role as "User"
+            };
+
+            await _userService.RegisterUserAsync(user, request.Password);
+            _logger.LogInformation("Registered user: {Username}", request.Username);
+            return Ok(new { message = "User registered successfully." });
         }
 
         [HttpPost("login")]

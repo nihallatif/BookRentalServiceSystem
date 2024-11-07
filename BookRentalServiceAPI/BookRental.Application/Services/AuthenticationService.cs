@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BookRental.Application.Interfaces;
@@ -28,7 +29,7 @@ namespace BookRental.Application.Services
         {
             // Validate user credentials
             var user = await _userRepository.GetUserByUsernameAsync(request.Username);
-            if (user == null || !VerifyPasswordHash(request.Password, user.PasswordHash))
+            if (user == null || !VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
                 throw new UnauthorizedAccessException("Invalid username or password.");
             }
@@ -63,10 +64,17 @@ namespace BookRental.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private bool VerifyPasswordHash(string password, string storedHash)
+        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
         {
-            // Implement password hash verification (you might need to use a hashing library or write your own)
-            return password == storedHash;  // Simplified for demonstration; replace with secure hashing
+            using (var hmac = new HMACSHA256(storedSalt))
+            {
+                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != storedHash[i]) return false;
+                }
+            }
+            return true;
         }
     }
 }

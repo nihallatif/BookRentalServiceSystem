@@ -4,6 +4,7 @@ using BookRental.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,9 +29,22 @@ namespace BookRental.Application.Services
             return await _userRepository.GetUserByUsernameAsync(username);
         }
 
-        public async Task RegisterUserAsync(User user)
+        public async Task RegisterUserAsync(User user, string password)
         {
+            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
             await _userRepository.AddUserAsync(user);
+        }
+
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA256())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            }
         }
 
         public async Task UpdateUserAsync(User user)
