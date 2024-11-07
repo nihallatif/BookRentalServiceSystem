@@ -1,4 +1,5 @@
-﻿using BookRental.Application.Interfaces;
+﻿using BookRental.Application.Common;
+using BookRental.Application.Interfaces;
 using BookRental.Domain.Interfaces;
 
 namespace BookRental.Api.BackgroundServices
@@ -18,7 +19,7 @@ namespace BookRental.Api.BackgroundServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Running overdue rental check...");
+                _logger.LogInformation(Messages.OverdueRentalCheck);
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -31,11 +32,11 @@ namespace BookRental.Api.BackgroundServices
                     {
                         var userEmail = rental.User.Username;  // Assuming User entity has an Email property
                         var bookTitle = rental.Book.Title;
-                        var subject = "Overdue Rental Reminder";
+                        var subject = Messages.OverdueRentalReminder;
                         var body = $"Dear Customer,<br><br>Your rental for '{bookTitle}' is overdue. Please return it as soon as possible to avoid further penalties.";
 
                         await emailService.SendEmailAsync(userEmail, subject, body);
-                        _logger.LogInformation("Sent overdue notification to {UserEmail}", userEmail);
+                        _logger.LogInformation(Messages.OverdueNotificationSent + "to {UserEmail}", userEmail);
                     }
                 }
 

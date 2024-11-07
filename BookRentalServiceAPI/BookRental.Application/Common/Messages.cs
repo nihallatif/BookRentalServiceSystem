@@ -42,6 +42,8 @@ namespace BookRental.Application.Common
         public const string OverdueNotificationSent = "Overdue notification sent successfully.";
         public const string NoRentalsFound = "No rentals found.";
         public const string NoRentalsFoundOrReturned = "No rentals found or already returned.";
+        public const string OverdueRentalCheck = "Running overdue rental check...";
+        public const string OverdueRentalReminder = "Overdue rental reminder";
 
         // Rental extension messages
         public const string RentalExtendedSuccessfully = "Rental extended successfully.";
