@@ -1,3 +1,4 @@
+using BookRental.Api.Middleware;
 using BookRental.Application.Interfaces;
 using BookRental.Application.Services;
 using BookRental.Domain.Interfaces;
@@ -7,8 +8,30 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Set up Serilog configuration
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.File("Logs/book_rental_log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+// Define CORS policy
+var corsPolicy = "AllowAll";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicy, policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Add services to the container.
 // Configure EF Core DbContext
@@ -26,6 +49,8 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 builder.Services.AddScoped<IWaitingListService, WaitingListService>();
+
+builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 // JWT Authentication configuration
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -48,6 +73,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Host.UseSerilog();
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
@@ -55,8 +82,11 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors(corsPolicy);
 
 // Enable authentication and authorization middleware
 app.UseAuthentication();

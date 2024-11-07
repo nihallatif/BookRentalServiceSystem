@@ -10,10 +10,12 @@ namespace BookRental.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthenticationService authenticationService)
+        public AuthController(IAuthenticationService authenticationService, ILogger<AuthController> logger)
         {
             _authenticationService = authenticationService;
+            _logger = logger;
         }
 
         [HttpPost("login")]
@@ -26,6 +28,7 @@ namespace BookRental.Api.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
+                _logger.LogInformation("Unauthorized user: {Username}", request.Username);
                 return Unauthorized(new { message = ex.Message });
             }
         }
