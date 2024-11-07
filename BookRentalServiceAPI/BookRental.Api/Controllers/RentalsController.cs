@@ -1,4 +1,6 @@
-﻿using BookRental.Application.Interfaces;
+﻿using BookRental.Application.Common;
+using BookRental.Application.Interfaces;
+using BookRental.Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,35 +23,30 @@ namespace BookRental.Api.Controllers
         }
 
         [HttpPost("rent")]
-        public async Task<IActionResult> RentBook([FromBody] int bookId)
+        public async Task<IActionResult> RentBook([FromBody] RentBookRequest request)
         {
             if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
             {
-                _logger.LogInformation("User Id not found");
-                return Unauthorized(new { message = "User ID not found in token." });
+                _logger.LogInformation(Messages.UserNotFound);
+                return Unauthorized(new { message = Messages.UserNotFound });
             }
-            await _rentalService.RentBookAsync(bookId, userId);
-            _logger.LogInformation("Book rented: {BookId}", bookId);
-            return Ok(new { message = "Book rented successfully." });
+            await _rentalService.RentBookAsync(request.BookId, userId);
+            _logger.LogInformation(Messages.BookRentedSuccessfully + ": {BookId}", request.BookId);
+            return Ok(new { message = Messages.BookRentedSuccessfully });
         }
 
         [HttpPost("return")]
         public async Task<IActionResult> ReturnBook([FromBody] int rentalId)
         {
             await _rentalService.ReturnBookAsync(rentalId);
-            _logger.LogInformation("Book returned: {Rental}", rentalId);
-            return Ok(new { message = "Book returned successfully." });
+            _logger.LogInformation(Messages.BookReturnedSuccessfully + ": {Rental}", rentalId);
+            return Ok(new { message = Messages.BookReturnedSuccessfully });
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserRentals(int userId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int UserId))
-            {
-                _logger.LogInformation("User not found.");
-                return Unauthorized(new { message = "User ID not found in token." });
-            }
-            _logger.LogInformation("Rental list of user: {UserId}", userId);
+            _logger.LogInformation(Messages.UserRentalList + ": {UserId}", userId);
             var rentals = await _rentalService.GetRentalsByUserIdAsync(userId);
             return Ok(rentals);
         }

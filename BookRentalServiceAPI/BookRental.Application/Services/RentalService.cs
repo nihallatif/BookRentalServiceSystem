@@ -1,4 +1,5 @@
-﻿using BookRental.Application.Interfaces;
+﻿using BookRental.Application.Common;
+using BookRental.Application.Interfaces;
 using BookRental.Domain.Entities;
 using BookRental.Domain.Interfaces;
 using System;
@@ -26,11 +27,11 @@ namespace BookRental.Application.Services
         {
             var book = await _bookRepository.GetBookByIdAsync(bookId);
             if (book == null)
-                throw new ArgumentException("Book not found.");
+                throw new ArgumentException(Messages.BookNotFound);
 
             if (book.AvailableCopies <= 0)
             {
-                throw new InvalidOperationException("No copies available for rent. The user can be added to the waiting list.");
+                throw new InvalidOperationException(Messages.AddToWaitingList);
             }
 
             book.AvailableCopies--;
@@ -50,7 +51,7 @@ namespace BookRental.Application.Services
         {
             var rental = await _rentalRepository.GetRentalByIdAsync(rentalId);
             if (rental == null || rental.ReturnDate != null)
-                throw new ArgumentException("Rental not found or already returned.");
+                throw new ArgumentException(Messages.NoRentalsFoundOrReturned);
 
             rental.ReturnDate = DateTime.UtcNow;
             await _rentalRepository.UpdateRentalAsync(rental);

@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using BookRental.Application.Common;
 using BookRental.Application.Interfaces;
 using BookRental.Application.Models;
 using BookRental.Domain.Entities;
@@ -31,7 +32,7 @@ namespace BookRental.Application.Services
             var user = await _userRepository.GetUserByUsernameAsync(request.Username);
             if (user == null || !VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
-                throw new UnauthorizedAccessException("Invalid username or password.");
+                throw new UnauthorizedAccessException(Messages.InvalidUsernameOrPassword);
             }
 
             // Generate JWT token
@@ -46,10 +47,10 @@ namespace BookRental.Application.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Username),  // Add UserId as a claim
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -9,6 +9,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using BookRental.Application.Common;
 
 
 namespace BookRental.Application.Services
@@ -45,11 +46,11 @@ namespace BookRental.Application.Services
                 mailMessage.To.Add(to);
 
                 await smtpClient.SendMailAsync(mailMessage);
-                _logger.LogInformation("Email sent successfully to {Recipient}", to);
+                _logger.LogInformation(Messages.EmailSent + "{Recipient}", to);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while sending email to {Recipient}", to);
+                _logger.LogError(ex, Messages.EmailError + "{Recipient}", to);
             }
         }
     }

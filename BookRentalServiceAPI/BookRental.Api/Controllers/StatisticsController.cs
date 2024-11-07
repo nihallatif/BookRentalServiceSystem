@@ -1,4 +1,5 @@
-﻿using BookRental.Application.Interfaces;
+﻿using BookRental.Application.Common;
+using BookRental.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,9 @@ namespace BookRental.Api.Controllers
         {
             var book = await _rentalService.GetMostOverdueBookAsync();
             if (book == null)
-                return NotFound(new { message = "No overdue books found." });
+                return NotFound(new { message = Messages.NoOverdueBookFound });
 
-            _logger.LogInformation("Most overdue book found.");
+            _logger.LogInformation(Messages.MostOverdueBookFound);
             return Ok(book);
         }
 
@@ -35,9 +36,9 @@ namespace BookRental.Api.Controllers
         {
             var book = await _rentalService.GetMostPopularBookAsync();
             if (book == null)
-                return NotFound(new { message = "No rentals found." });
+                return NotFound(new { message = Messages.NoRentalsFound });
 
-            _logger.LogInformation("Most popular book found.");
+            _logger.LogInformation(Messages.MostPopularBookFound);
             return Ok(book);
         }
 
@@ -46,9 +47,9 @@ namespace BookRental.Api.Controllers
         {
             var book = await _rentalService.GetLeastPopularBookAsync();
             if (book == null)
-                return NotFound(new { message = "No rentals found." });
+                return NotFound(new { message = Messages.NoRentalsFound });
 
-            _logger.LogInformation("Least popular book found.");
+            _logger.LogInformation(Messages.LeastPopularBookFound);
             return Ok(book);
         }
     }
