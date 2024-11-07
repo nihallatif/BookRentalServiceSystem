@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using Serilog.Events;
+using BookRental.Api.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 builder.Services.AddScoped<IWaitingListService, WaitingListService>();
 
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<OverdueRentalNotificationService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 // JWT Authentication configuration
