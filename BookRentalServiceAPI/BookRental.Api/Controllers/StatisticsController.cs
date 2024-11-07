@@ -11,10 +11,12 @@ namespace BookRental.Api.Controllers
     public class StatisticsController : ControllerBase
     {
         private readonly IRentalService _rentalService;
+        private readonly ILogger<StatisticsController> _logger;
 
-        public StatisticsController(IRentalService rentalService)
+        public StatisticsController(IRentalService rentalService, ILogger<StatisticsController> logger)
         {
             _rentalService = rentalService;
+            _logger = logger;
         }
 
         [HttpGet("most-overdue-book")]
@@ -24,6 +26,7 @@ namespace BookRental.Api.Controllers
             if (book == null)
                 return NotFound(new { message = "No overdue books found." });
 
+            _logger.LogInformation("Most overdue book found.");
             return Ok(book);
         }
 
@@ -34,6 +37,7 @@ namespace BookRental.Api.Controllers
             if (book == null)
                 return NotFound(new { message = "No rentals found." });
 
+            _logger.LogInformation("Most popular book found.");
             return Ok(book);
         }
 
@@ -44,6 +48,7 @@ namespace BookRental.Api.Controllers
             if (book == null)
                 return NotFound(new { message = "No rentals found." });
 
+            _logger.LogInformation("Least popular book found.");
             return Ok(book);
         }
     }
