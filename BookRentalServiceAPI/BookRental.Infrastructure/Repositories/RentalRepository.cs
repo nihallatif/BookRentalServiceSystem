@@ -50,5 +50,33 @@ namespace BookRental.Infrastructure.Repositories
                 .Include(r => r.User)
                 .ToListAsync();
         }
+
+        public async Task<Book> GetMostOverdueBookAsync()
+        {
+            return await _context.Rentals
+                .Where(r => r.IsOverdue)
+                .GroupBy(r => r.BookId)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.First().Book)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Book> GetMostPopularBookAsync()
+        {
+            return await _context.Rentals
+                .GroupBy(r => r.BookId)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.First().Book)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Book> GetLeastPopularBookAsync()
+        {
+            return await _context.Rentals
+                .GroupBy(r => r.BookId)
+                .OrderBy(g => g.Count())
+                .Select(g => g.First().Book)
+                .FirstOrDefaultAsync();
+        }
     }
 }

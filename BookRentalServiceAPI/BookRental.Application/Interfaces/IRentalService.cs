@@ -13,5 +13,9 @@ namespace BookRental.Application.Interfaces
         Task ReturnBookAsync(int rentalId);
         Task<IEnumerable<Rental>> GetRentalsByUserIdAsync(int userId);
         Task<IEnumerable<Rental>> GetOverdueRentalsAsync();
+
+        Task<Book> GetMostOverdueBookAsync();
+        Task<Book> GetMostPopularBookAsync();
+        Task<Book> GetLeastPopularBookAsync();
     }
 }

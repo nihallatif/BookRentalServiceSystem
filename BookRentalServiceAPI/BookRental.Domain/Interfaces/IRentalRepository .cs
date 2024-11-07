@@ -9,5 +9,10 @@ namespace BookRental.Domain.Interfaces
         Task AddRentalAsync(Rental rental);
         Task UpdateRentalAsync(Rental rental);
         Task<IEnumerable<Rental>> GetOverdueRentalsAsync();
+
+        //Statistics
+        Task<Book> GetMostOverdueBookAsync();
+        Task<Book> GetMostPopularBookAsync();
+        Task<Book> GetLeastPopularBookAsync();
     }
 }

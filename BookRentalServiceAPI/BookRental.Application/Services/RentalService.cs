@@ -75,5 +75,20 @@ namespace BookRental.Application.Services
         {
             return await _rentalRepository.GetOverdueRentalsAsync();
         }
+
+        public async Task<Book> GetMostOverdueBookAsync()
+        {
+            return await _rentalRepository.GetMostOverdueBookAsync();
+        }
+
+        public async Task<Book> GetMostPopularBookAsync()
+        {
+            return await _rentalRepository.GetMostPopularBookAsync();
+        }
+
+        public async Task<Book> GetLeastPopularBookAsync()
+        {
+            return await _rentalRepository.GetLeastPopularBookAsync();
+        }
     }
 }
