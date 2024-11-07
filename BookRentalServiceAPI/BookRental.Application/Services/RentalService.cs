@@ -13,41 +13,56 @@ namespace BookRental.Application.Services
     {
         private readonly IRentalRepository _rentalRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IWaitingListRepository _waitingListRepository;
 
-        public RentalService(IRentalRepository rentalRepository, IBookRepository bookRepository)
+        public RentalService(IRentalRepository rentalRepository, IBookRepository bookRepository, IWaitingListRepository waitingListRepository)
         {
             _rentalRepository = rentalRepository;
             _bookRepository = bookRepository;
+            _waitingListRepository = waitingListRepository;
         }
 
         public async Task RentBookAsync(int bookId, int userId)
         {
             var book = await _bookRepository.GetBookByIdAsync(bookId);
-            if (book.AvailableCopies > 0)
-            {
-                book.AvailableCopies--;
-                await _bookRepository.UpdateBookAsync(book);
+            if (book == null)
+                throw new ArgumentException("Book not found.");
 
-                var rental = new Rental { BookId = bookId, UserId = userId, RentalDate = DateTime.UtcNow };
-                await _rentalRepository.AddRentalAsync(rental);
-            }
-            else
+            if (book.AvailableCopies <= 0)
             {
-                throw new InvalidOperationException("No copies available for rent.");
+                throw new InvalidOperationException("No copies available for rent. The user can be added to the waiting list.");
             }
+
+            book.AvailableCopies--;
+            await _bookRepository.UpdateBookAsync(book);
+
+            var rental = new Rental
+            {
+                BookId = bookId,
+                UserId = userId,
+                RentalDate = DateTime.UtcNow,
+                IsOverdue = false
+            };
+            await _rentalRepository.AddRentalAsync(rental);
         }
 
         public async Task ReturnBookAsync(int rentalId)
         {
             var rental = await _rentalRepository.GetRentalByIdAsync(rentalId);
-            if (rental != null && rental.ReturnDate == null)
-            {
-                rental.ReturnDate = DateTime.UtcNow;
-                await _rentalRepository.UpdateRentalAsync(rental);
+            if (rental == null || rental.ReturnDate != null)
+                throw new ArgumentException("Rental not found or already returned.");
 
-                var book = await _bookRepository.GetBookByIdAsync(rental.BookId);
-                book.AvailableCopies++;
-                await _bookRepository.UpdateBookAsync(book);
+            rental.ReturnDate = DateTime.UtcNow;
+            await _rentalRepository.UpdateRentalAsync(rental);
+
+            var book = await _bookRepository.GetBookByIdAsync(rental.BookId);
+            book.AvailableCopies++;
+            await _bookRepository.UpdateBookAsync(book);
+
+            var nextInLine = await _waitingListRepository.GetNextInWaitingListAsync(book.Id);
+            if (nextInLine != null)
+            {
+                // Notify next in waiting list (optional, handled by notification service)
             }
         }
 
