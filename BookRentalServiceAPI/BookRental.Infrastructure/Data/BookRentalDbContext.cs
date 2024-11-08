@@ -21,8 +21,13 @@ namespace BookRental.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure any additional settings here if needed
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Book>()
+                .Property(b => b.RowVersion)
+                .IsRowVersion();
+
+            modelBuilder.Entity<Rental>()
+                .Property(r => r.RowVersion)
+                .IsRowVersion();
         }
     }
 }

@@ -24,5 +24,7 @@ namespace BookRental.Domain.Entities
         public string ISBN { get; set; }
         public string Genre { get; set; }
         public int AvailableCopies { get; set; }  // Tracks how many copies are available for rent
+
+        public byte[] RowVersion { get; set; } // Add this line to handle concurrency
     }
 }

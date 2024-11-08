@@ -16,74 +16,97 @@ namespace BookRental.Application.Services
         private readonly IBookRepository _bookRepository;
         private readonly IWaitingListRepository _waitingListRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
 
-        public RentalService(IRentalRepository rentalRepository, IBookRepository bookRepository, IWaitingListRepository waitingListRepository, IUserRepository userRepository,
-            IEmailService emailService)
+        public RentalService(IRentalRepository rentalRepository, IBookRepository bookRepository, 
+            IWaitingListRepository waitingListRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _rentalRepository = rentalRepository;
             _bookRepository = bookRepository;
             _waitingListRepository = waitingListRepository;
-            _userRepository = userRepository;   
+            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _emailService = emailService;
         }
 
         public async Task RentBookAsync(int bookId, int userId)
         {
-            var book = await _bookRepository.GetBookByIdAsync(bookId);
-            if (book == null)
-                throw new ArgumentException(Messages.BookNotFound);
-
-            if (book.AvailableCopies <= 0)
+            using (var transaction = await _unitOfWork.BeginTransactionAsync())
             {
-                throw new InvalidOperationException(Messages.AddToWaitingList);
+                try
+                {
+                    var book = await _bookRepository.GetBookByIdAsync(bookId);
+                    if (book == null)
+                        throw new ArgumentException("Book not found.");
+
+                    if (book.AvailableCopies <= 0)
+                        throw new InvalidOperationException("No copies available for rent.");
+
+                    book.AvailableCopies--;
+                    await _bookRepository.UpdateBookAsync(book);
+
+                    var rental = new Rental
+                    {
+                        BookId = bookId,
+                        UserId = userId,
+                        RentalDate = DateTime.UtcNow,
+                        IsOverdue = false
+                    };
+                    await _rentalRepository.AddRentalAsync(rental);
+
+                    await _unitOfWork.CommitTransactionAsync();
+                }
+                catch (Exception)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw;
+                }
             }
-
-            book.AvailableCopies--;
-            await _bookRepository.UpdateBookAsync(book);
-
-            var rental = new Rental
-            {
-                BookId = bookId,
-                UserId = userId,
-                RentalDate = DateTime.UtcNow,
-                IsOverdue = false
-            };
-            await _rentalRepository.AddRentalAsync(rental);
         }
 
         public async Task ReturnBookAsync(int rentalId)
         {
-            var rental = await _rentalRepository.GetRentalByIdAsync(rentalId);
-            if (rental == null || rental.ReturnDate != null)
-                throw new ArgumentException(Messages.NoRentalsFoundOrReturned);
-
-            // Mark the book as returned
-            rental.ReturnDate = DateTime.UtcNow;
-            await _rentalRepository.UpdateRentalAsync(rental);
-
-            // Increase the available copies of the book
-            var book = await _bookRepository.GetBookByIdAsync(rental.BookId);
-            book.AvailableCopies++;
-            await _bookRepository.UpdateBookAsync(book);
-
-            // Check if there is a user on the waiting list for this book
-            var nextInLine = await _waitingListRepository.GetNextInWaitingListAsync(book.Id);
-            if (nextInLine != null)
+            using (var transaction = await _unitOfWork.BeginTransactionAsync())
             {
-                // Fetch the user's email from the UserRepository
-                var user = await _userRepository.GetUserByIdAsync(nextInLine.UserId);
-                if (user != null)
+                try
                 {
-                    // Send an email notification to the next user in line
-                    await _emailService.SendEmailAsync(
-                        to: user.Username, // Assuming Username is used as email
-                        subject: Messages.BookAvailableForRent,
-                        body: $"Hello {user.Username},<br><br>The book '{book.Title}' you requested is now available for rent!"
-                    );
+                    var rental = await _rentalRepository.GetRentalByIdAsync(rentalId);
+                    if (rental == null || rental.ReturnDate != null)
+                        throw new ArgumentException("Rental not found or already returned.");
 
-                    // Remove the user from the waiting list after notifying
-                    await _waitingListRepository.RemoveFromWaitingListAsync(nextInLine);
+                    // Mark the book as returned
+                    rental.ReturnDate = DateTime.UtcNow;
+                    await _rentalRepository.UpdateRentalAsync(rental);
+
+                    var book = await _bookRepository.GetBookByIdAsync(rental.BookId);
+                    book.AvailableCopies++;
+                    await _bookRepository.UpdateBookAsync(book);
+
+                    // Notify the next user in the waiting list if any
+                    var nextInLine = await _waitingListRepository.GetNextInWaitingListAsync(book.Id);
+                    if (nextInLine != null)
+                    {
+                        // Fetch user details to send notification
+                        var user = await _userRepository.GetUserByIdAsync(nextInLine.UserId);
+                        if (user != null)
+                        {
+                            await _emailService.SendEmailAsync(
+                                to: user.Username,
+                                subject: "Book Available for Rent",
+                                body: $"Hello {user.Username}, the book '{book.Title}' you requested is now available."
+                            );
+
+                            await _waitingListRepository.RemoveFromWaitingListAsync(nextInLine);
+                        }
+                    }
+
+                    await _unitOfWork.CommitTransactionAsync();
+                }
+                catch (Exception)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw;
                 }
             }
         }

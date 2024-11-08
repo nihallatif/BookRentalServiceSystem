@@ -40,6 +40,12 @@ namespace BookRental.Infrastructure.Repositories
             _context.WaitingLists.Remove(entry);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<WaitingList> GetUserOnWaitingListAsync(int bookId, int userId)
+        {
+            return await _context.WaitingLists
+                .FirstOrDefaultAsync(w => w.BookId == bookId && w.UserId == userId);
+        }
     }
 }
 

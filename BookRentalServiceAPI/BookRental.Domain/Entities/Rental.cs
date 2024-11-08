@@ -15,6 +15,7 @@ namespace BookRental.Domain.Entities
         public DateTime? ReturnDate { get; set; }
         public bool IsOverdue { get; set; }
         public int ExtensionCount { get; set; } = 0;  // Limits rental extensions
+        public byte[] RowVersion { get; set; } // Add this line to handle concurrency
 
         // Navigation properties
         public Book Book { get; set; }

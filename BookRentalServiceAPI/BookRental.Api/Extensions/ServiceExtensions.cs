@@ -23,6 +23,8 @@ namespace BookRental.Api.Extensions
             services.AddScoped<IRentalService, RentalService>();
             services.AddScoped<IWaitingListService, WaitingListService>();
 
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IEmailService, EmailService>();
             services.AddHostedService<OverdueRentalNotificationService>();
             services.AddTransient<ExceptionHandlingMiddleware>();
