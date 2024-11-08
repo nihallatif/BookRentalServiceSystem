@@ -57,7 +57,7 @@ namespace BookRental.Api.Controllers
             }
 
             await _bookService.AddBookAsync(book);
-            _logger.LogInformation(Messages.BookAdded + "{Title}: {BookId}", book.Title, book.Id);
+            _logger.LogInformation(Messages.BookAdded + " {Title}: {BookId}", book.Title, book.Id);
             return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
         }
 

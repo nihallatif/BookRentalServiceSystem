@@ -1,4 +1,5 @@
-﻿using BookRental.Application.Interfaces;
+﻿using BookRental.Application.Common;
+using BookRental.Application.Interfaces;
 using BookRental.Domain.Entities;
 using BookRental.Domain.Interfaces;
 using System;
@@ -12,36 +13,48 @@ namespace BookRental.Application.Services
     public class WaitingListService : IWaitingListService
     {
         private readonly IWaitingListRepository _waitingListRepository;
-        private readonly IBookRepository _bookRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IEmailService _emailService;
 
-        public WaitingListService(IWaitingListRepository waitingListRepository, IBookRepository bookRepository)
+        public WaitingListService(IWaitingListRepository waitingListRepository, IUserRepository userRepository, IEmailService emailService)
         {
             _waitingListRepository = waitingListRepository;
-            _bookRepository = bookRepository;
+            _emailService = emailService;
+            _userRepository = userRepository;
         }
 
         public async Task AddToWaitingListAsync(int bookId, int userId)
         {
-            await _waitingListRepository.AddToWaitingListAsync(bookId, userId);
-        }
-
-        public async Task RemoveFromWaitingListAsync(int bookId, int userId)
-        {
-            await _waitingListRepository.RemoveFromWaitingListAsync(bookId, userId);
-        }
-
-        public async Task<IEnumerable<WaitingList>> GetWaitingListForBookAsync(int bookId)
-        {
-            return await _waitingListRepository.GetWaitingListForBookAsync(bookId);
-        }
-
-        public async Task NotifyNextInWaitingListAsync(int bookId)
-        {
-            var nextUser = await _waitingListRepository.GetNextInWaitingListAsync(bookId);
-            if (nextUser != null)
+            var entry = new WaitingList
             {
-                // Notify user (notification service can be injected and called here)
-                await _waitingListRepository.RemoveFromWaitingListAsync(bookId, nextUser.UserId);
+                BookId = bookId,
+                UserId = userId,
+                RequestedDate = DateTime.UtcNow
+            };
+
+            await _waitingListRepository.AddToWaitingListAsync(entry);
+        }
+
+        public async Task NotifyNextUserAsync(int bookId)
+        {
+            var nextInLine = await _waitingListRepository.GetNextInWaitingListAsync(bookId);
+            if (nextInLine != null)
+            {
+                // Fetch the user details using UserId
+                var user = await _userRepository.GetUserByIdAsync(nextInLine.UserId);
+
+                if (user != null)
+                {
+                    // Send email to the user's email (stored in Username field)
+                    await _emailService.SendEmailAsync(
+                        to: user.Username, // Using Username as Email
+                        subject: Messages.BookAvailableForRent,
+                        body: $"Hello {user.Username},<br><br>The book you requested is now available for rent!"
+                    );
+
+                    // Remove the user from the waiting list after notifying
+                    await _waitingListRepository.RemoveFromWaitingListAsync(nextInLine);
+                }
             }
         }
     }

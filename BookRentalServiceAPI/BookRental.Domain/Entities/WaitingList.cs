@@ -12,9 +12,5 @@ namespace BookRental.Domain.Entities
         public int BookId { get; set; }
         public int UserId { get; set; }
         public DateTime RequestedDate { get; set; }
-
-        // Navigation properties
-        public Book Book { get; set; }
-        public User User { get; set; }
     }
 }

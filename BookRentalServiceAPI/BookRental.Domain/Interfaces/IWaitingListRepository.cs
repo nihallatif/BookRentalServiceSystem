@@ -4,9 +4,9 @@ namespace BookRental.Domain.Interfaces
 {
     public interface IWaitingListRepository
     {
-        Task AddToWaitingListAsync(int bookId, int userId);
-        Task RemoveFromWaitingListAsync(int bookId, int userId);
-        Task<IEnumerable<WaitingList>> GetWaitingListForBookAsync(int bookId);
+        Task AddToWaitingListAsync(WaitingList entry);
         Task<WaitingList> GetNextInWaitingListAsync(int bookId);
+        Task<IEnumerable<WaitingList>> GetWaitingListByBookIdAsync(int bookId);
+        Task RemoveFromWaitingListAsync(WaitingList entry);
     }
 }

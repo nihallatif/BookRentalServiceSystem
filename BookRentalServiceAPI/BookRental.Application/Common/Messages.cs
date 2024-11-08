@@ -7,15 +7,16 @@ using System.Threading.Tasks;
 
 namespace BookRental.Application.Common
 {
-    public class Messages
+    public sealed class Messages
     {
         // User-related messages
         public const string UserNotFound = "User not found.";
         public const string UserRegisteredSuccessfully = "User registered successfully.";
         public const string UserUpdatedSuccessfully = "User updated successfully.";
-        public const string InvalidUsernameOrPassword = "Invalid username or password"
+        public const string InvalidUsernameOrPassword = "Invalid username or password";
 
         // Book-related messages
+        public const string BookAvailableForRent = "Book Available Notification";
         public const string BookNotAvailableForRent = "Book not available for rent.";
         public const string BookRentedSuccessfully = "Book rented successfully.";
         public const string BookReturnedSuccessfully = "Book returned successfully.";
@@ -49,6 +50,7 @@ namespace BookRental.Application.Common
         public const string RentalExtendedSuccessfully = "Rental extended successfully.";
         public const string RentalExtensionNotAllowed = "Maximum extension limit reached.";
         public const string InvalidRentalId = "Invalid rental ID or book already returned.";
+        public const string MaxRentalsReached = "Maximum rental extensions reached.";
 
         // General error messages
         public const string InvalidOperation = "Invalid operation.";

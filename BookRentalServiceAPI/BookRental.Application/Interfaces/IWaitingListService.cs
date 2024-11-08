@@ -10,8 +10,6 @@ namespace BookRental.Application.Interfaces
     public interface IWaitingListService
     {
         Task AddToWaitingListAsync(int bookId, int userId);
-        Task RemoveFromWaitingListAsync(int bookId, int userId);
-        Task<IEnumerable<WaitingList>> GetWaitingListForBookAsync(int bookId);
-        Task NotifyNextInWaitingListAsync(int bookId);
+        Task NotifyNextUserAsync(int bookId);
     }
 }

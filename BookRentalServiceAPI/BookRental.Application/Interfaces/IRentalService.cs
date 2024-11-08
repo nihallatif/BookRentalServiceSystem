@@ -1,9 +1,4 @@
 ﻿using BookRental.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BookRental.Application.Interfaces
 {
@@ -13,6 +8,7 @@ namespace BookRental.Application.Interfaces
         Task ReturnBookAsync(int rentalId);
         Task<IEnumerable<Rental>> GetRentalsByUserIdAsync(int userId);
         Task<IEnumerable<Rental>> GetOverdueRentalsAsync();
+        Task ExtendRentalAsync(int rentalId);
 
         Task<Book> GetMostOverdueBookAsync();
         Task<Book> GetMostPopularBookAsync();
