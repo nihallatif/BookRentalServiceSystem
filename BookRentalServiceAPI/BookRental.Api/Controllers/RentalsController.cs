@@ -27,7 +27,7 @@ namespace BookRental.Api.Controllers
         }
 
         [HttpPost("rent")]
-        public async Task<IActionResult> RentBook([FromBody] RentBookRequest request)
+        public async Task<IActionResult> RentBook([FromBody] BookRequest request)
         {
             if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
             {
@@ -40,10 +40,10 @@ namespace BookRental.Api.Controllers
         }
 
         [HttpPost("return")]
-        public async Task<IActionResult> ReturnBook([FromBody] int rentalId)
+        public async Task<IActionResult> ReturnBook([FromBody] RentalRequest request)
         {
-            await _rentalService.ReturnBookAsync(rentalId);
-            _logger.LogInformation(Messages.BookReturnedSuccessfully + ": {Rental}", rentalId);
+            await _rentalService.ReturnBookAsync(request.RentalId);
+            _logger.LogInformation(Messages.BookReturnedSuccessfully + ": {Rental}", request.RentalId);
             return Ok(new { message = Messages.BookReturnedSuccessfully });
         }
 
@@ -56,17 +56,17 @@ namespace BookRental.Api.Controllers
         }
 
         [HttpPost("waiting-list")]
-        public async Task<IActionResult> AddToWaitingList([FromBody] int bookId)
+        public async Task<IActionResult> AddToWaitingList([FromBody] BookRequest request)
         {
             int userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub));
-            await _waitingListService.AddToWaitingListAsync(bookId, userId);
+            await _waitingListService.AddToWaitingListAsync(request.BookId, userId);
             return Ok(new { message = "Added to waiting list successfully." });
         }
 
         [HttpPost("extend")]
-        public async Task<IActionResult> ExtendRental([FromBody] int rentalId)
+        public async Task<IActionResult> ExtendRental([FromBody] RentalRequest request)
         {
-            await _rentalService.ExtendRentalAsync(rentalId);
+            await _rentalService.ExtendRentalAsync(request.RentalId);
             return Ok(new { message = "Rental extended successfully." });
         }
     }

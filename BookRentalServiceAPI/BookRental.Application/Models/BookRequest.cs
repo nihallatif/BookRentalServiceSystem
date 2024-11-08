@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BookRental.Application.Models
 {
-    public class RentBookRequest
+    public class BookRequest
     {
         public int BookId { get; set; }
     }
