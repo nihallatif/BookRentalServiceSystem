@@ -24,7 +24,7 @@ namespace BookRental.Tests
                         services.Remove(descriptor);
                     }
 
-                    // Add a new in-memory database for testing
+                    // Add an in-memory database for testing
                     services.AddDbContext<BookRentalDbContext>(options =>
                         options.UseInMemoryDatabase("TestDb"));
                 });
