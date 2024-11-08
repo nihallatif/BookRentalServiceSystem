@@ -32,7 +32,7 @@ namespace BookRental.Application.Services
                 var smtpClient = new SmtpClient(_emailSettings.SmtpServer)
                 {
                     Port = _emailSettings.Port,
-                    Credentials = new NetworkCredential(_emailSettings.SenderEmail, _emailSettings.SenderPassword),
+                    Credentials = new NetworkCredential(_emailSettings.SenderUsername, _emailSettings.SenderPassword),
                     EnableSsl = true,
                 };
 

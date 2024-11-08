@@ -44,7 +44,7 @@ namespace BookRental.Api.BackgroundServices
                     }
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Runs daily
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken); // Runs daily
             }
         }
 

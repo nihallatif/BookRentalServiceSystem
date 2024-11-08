@@ -51,5 +51,11 @@ namespace BookRental.Api.Controllers
                 return Unauthorized(new { message = ex.Message });
             }
         }
+        [HttpPost("test-email")]
+        public async Task<IActionResult> TestEmail([FromServices] IEmailService emailService)
+        {
+            await emailService.SendEmailAsync("nihal.latif@gmail.com", "Test Email", "<h1>Hello from Book Rental API</h1>");
+            return Ok("Email sent successfully!");
+        }
     }
 }
