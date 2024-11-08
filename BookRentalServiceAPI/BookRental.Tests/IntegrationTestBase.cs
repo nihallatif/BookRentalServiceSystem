@@ -24,7 +24,7 @@ namespace BookRental.Tests
                         services.Remove(descriptor);
                     }
 
-                    // Add an in-memory database for testing
+                    // Add a new in-memory database for testing
                     services.AddDbContext<BookRentalDbContext>(options =>
                         options.UseInMemoryDatabase("TestDb"));
                 });
@@ -33,5 +33,28 @@ namespace BookRental.Tests
             Client = webAppFactory.CreateClient();
             Context = webAppFactory.Services.CreateScope().ServiceProvider.GetRequiredService<BookRentalDbContext>();
         }
+
+        //public IntegrationTestBase(WebApplicationFactory<Program> factory)
+        //{
+        //    var webAppFactory = factory.WithWebHostBuilder(builder =>
+        //    {
+        //        builder.ConfigureServices(services =>
+        //        {
+        //            // Remove the existing DbContext registration
+        //            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<BookRentalDbContext>));
+        //            if (descriptor != null)
+        //            {
+        //                services.Remove(descriptor);
+        //            }
+
+        //            // Add an in-memory database for testing
+        //            services.AddDbContext<BookRentalDbContext>(options =>
+        //                options.UseInMemoryDatabase("TestDb"));
+        //        });
+        //    });
+
+        //    Client = webAppFactory.CreateClient();
+        //    Context = webAppFactory.Services.CreateScope().ServiceProvider.GetRequiredService<BookRentalDbContext>();
+        //}
     }
 }

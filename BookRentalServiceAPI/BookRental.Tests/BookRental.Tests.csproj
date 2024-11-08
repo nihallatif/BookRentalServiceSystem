@@ -24,11 +24,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BookRental.Api\BookRental.Api.csproj" />
+    <ProjectReference Include="..\BookRental.Application\BookRental.Application.csproj" />
     <ProjectReference Include="..\BookRental.Infrastructure\BookRental.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <InternalsVisibleTo Include="BookRental.Tests" />
   </ItemGroup>
 
 </Project>
