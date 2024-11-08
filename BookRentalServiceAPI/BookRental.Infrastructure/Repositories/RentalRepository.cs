@@ -36,6 +36,13 @@ namespace BookRental.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<Rental>> GetActiveRentalsAsync()
+        {
+            return await _context.Rentals
+                .Where(r => r.ReturnDate == null && !r.IsOverdue)
+                .ToListAsync();
+        }
+
         public async Task UpdateRentalAsync(Rental rental)
         {
             _context.Rentals.Update(rental);

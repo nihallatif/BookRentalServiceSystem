@@ -1,17 +1,21 @@
 ﻿using BookRental.Application.Common;
 using BookRental.Application.Interfaces;
+using BookRental.Application.Models;
 using BookRental.Domain.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace BookRental.Api.BackgroundServices
 {
     public class OverdueRentalNotificationService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly RentalSettings _rentalSettings;
         private readonly ILogger<OverdueRentalNotificationService> _logger;
 
-        public OverdueRentalNotificationService(IServiceProvider serviceProvider, ILogger<OverdueRentalNotificationService> logger)
+        public OverdueRentalNotificationService(IServiceProvider serviceProvider, IOptions<RentalSettings> rentalSettings, ILogger<OverdueRentalNotificationService> logger)
         {
             _serviceProvider = serviceProvider;
+            _rentalSettings = rentalSettings.Value;
             _logger = logger;
         }
 
@@ -41,6 +45,24 @@ namespace BookRental.Api.BackgroundServices
                 }
 
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Runs daily
+            }
+        }
+
+        private async Task UpdateOverdueRentalsAsync(IRentalRepository rentalRepository)
+        {
+            var today = DateTime.UtcNow;
+            var overdueRentals = await rentalRepository.GetActiveRentalsAsync();
+
+            foreach (var rental in overdueRentals)
+            {
+                // Calculate if the rental is overdue
+                var dueDate = rental.RentalDate.AddDays(_rentalSettings.DefaultRentalPeriodInDays); 
+                if (rental.ReturnDate == null && today > dueDate)
+                {
+                    rental.IsOverdue = true;
+                    await rentalRepository.UpdateRentalAsync(rental);
+                    _logger.LogInformation($"Marked rental {rental.Id} as overdue.");
+                }
             }
         }
     }

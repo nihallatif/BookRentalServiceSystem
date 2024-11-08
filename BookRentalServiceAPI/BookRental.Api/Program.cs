@@ -1,5 +1,6 @@
 using BookRental.Api.Extensions;
 using BookRental.Api.Middleware;
+using BookRental.Application.Models;
 using Serilog;
 using Serilog.Events;
 
@@ -24,6 +25,8 @@ builder.Services.RegisterServices();
 
 // JWT Authentication configuration
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.Configure<RentalSettings>(builder.Configuration.GetSection("RentalSettings"));
 
 builder.Host.UseSerilog();
 
