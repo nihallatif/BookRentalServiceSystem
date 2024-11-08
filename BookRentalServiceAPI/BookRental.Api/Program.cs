@@ -16,7 +16,7 @@ Log.Logger = new LoggerConfiguration()
 // Define CORS policy
 builder.Services.AddCorsPolicy();
 
-// Add services to the container.
+// DbContext and Connection
 builder.Services.AddBookRentalDbContext(builder.Configuration);
 
 // Register repositories
