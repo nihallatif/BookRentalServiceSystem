@@ -1,9 +1,6 @@
 ﻿using BookRental.Application.Interfaces;
 using BookRental.Application.Models;
-using BookRental.Application.Services;
 using BookRental.Domain.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookRental.Api.Controllers

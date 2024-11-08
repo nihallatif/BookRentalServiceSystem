@@ -2,11 +2,6 @@
 using BookRental.Application.Interfaces;
 using BookRental.Domain.Entities;
 using BookRental.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BookRental.Application.Services
 {
